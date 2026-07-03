@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres_oltp:
+    image: postgres:16-alpine
+    container_name: quackdb_postgres_oltp
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: telemetry_secret_pass
+      POSTGRES_DB: raw_telemetry
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local
