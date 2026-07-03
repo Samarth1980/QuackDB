@@ -6,7 +6,7 @@ services:
     container_name: quackdb_postgres_oltp
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: telemetry_secret_pass
