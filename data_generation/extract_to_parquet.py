@@ -31,12 +31,14 @@ def migrate_oltp_to_parquet():
     con = duckdb.connect(db_path)
     
     # Create a native view inside DuckDB pointing directly to the Parquet file
+    # used DuckDB to map a virtual view to your Parquet file
     con.execute(f"""
         CREATE OR REPLACE VIEW raw_logs AS 
         SELECT * FROM read_parquet('{parquet_file_path}');
     """)
     
     # Run a quick check aggregate query to verify it works
+    # ran the very first DuckDB SQL query
     row_count = con.execute("SELECT COUNT(*) FROM raw_logs;").fetchone()[0]
     print(f"🎉 DuckDB OLAP layer initialized! View 'raw_logs' mapped to {row_count} records.")
     con.close()
