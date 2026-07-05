@@ -99,7 +99,7 @@ The following baseline metrics were successfully established and processed acros
 
 The mathematical formula for the Population Stability Index across $k$ distribution bins is defined as:
 
-$$PSI = \sum_{i=1}^{k} \left( (Actual\%_i - Expected\%_i) \times \ln\left(\frac{Actual\%_i}{Expected\%_i}\right) \right)$$
+$$PSI = \sum_{i=1}^{k} \left( \text{Actual}_i - \text{Expected}_i \right) \times \ln\left(\frac{\text{Actual}_i}{\text{Expected}_i}\right)$$
 
 | Operational Target | Value | System Assessment State |
 | :--- | :--- | :--- |
