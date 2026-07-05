@@ -1,0 +1,21 @@
+name: 'quackdb_pipeline'
+version: '1.0.0'
+config-version: 2
+
+# Link this project to the profile configuration we defined above
+profile: 'quackdb_profile'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets:
+  - "target"
+
+models:
+  quackdb_pipeline:
+    # Staging models will be built as fast, temporary views
+    staging:
+      +materialized: view
+    # Production analytical marts will be built as concrete physical tables
+    marts:
+      +materialized: table
