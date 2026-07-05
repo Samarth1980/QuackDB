@@ -14,14 +14,14 @@ def execute_quantization_hypothesis_test():
     query = """
     SELECT tokens_per_sec, model_configuration 
     FROM main.fct_inference_requests
-    WHERE model_configuration IN ('INT8', 'INT4');
+    WHERE model_configuration IN ('INT8_quantized', 'INT4_extreme_quant');
     """
     df = con.execute(query).df()
     con.close()
     
     # Isolate populations
-    int8_throughput = df[df['model_configuration'] == 'INT8']['tokens_per_sec']
-    int4_throughput = df[df['model_configuration'] == 'INT4']['tokens_per_sec']
+    int8_throughput = df[df['model_configuration'] == 'INT8_quantized']['tokens_per_sec']
+    int4_throughput = df[df['model_configuration'] == 'INT4_extreme_quant']['tokens_per_sec']
     
     print(f"\n📊 Extracted sample populations from main warehouse:")
     print(f"   • INT8 Config Sample Size: {len(int8_throughput):,}")

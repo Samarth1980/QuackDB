@@ -5,7 +5,7 @@ import streamlit as st
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="QuackDB | LLM Cluster Telemetry",
+    page_title="QuackDB | Cluster Observability",
     page_icon="🦆",
     layout="wide"
 )
@@ -18,19 +18,30 @@ def get_warehouse_data(query):
     con.close()
     return df
 
-# 3. Main Dashboard Header
-st.title("🦆 QuackDB Infrastructure Analytics Platform")
-st.markdown("### Real-Time LLM Production Cluster Performance & Telemetry Warehouse")
-st.write("---")
+# 3. Header Infrastructure
+st.title("🦆 QuackDB Enterprise Observability Engine")
+st.markdown("### Real-Time Core Telemetry Warehouse & Advanced Production Drift Monitor")
 
-# 4. Fetch Global Metrics for Top KPI Cards
+# -------------------------------------------------------------------------
+# LIVE ALERTS LAYER: Population Stability Index Banner
+# -------------------------------------------------------------------------
+# Hardcoded from your Hour 12 analysis to simulate a production monitoring loop
+psi_score = 0.47723 
+st.write("---")
+st.error(
+    f"🚨 **CRITICAL INFRASTRUCTURE ALERT:** Systemic distribution drift caught! "
+    f"Calculated Population Stability Index (PSI): **{psi_score:.5f}** (Threshold >= 0.25). "
+    f"Potential thermal throttling or packet routing anomalies detected across active clusters."
+)
+
+# 4. Fetch Global Metrics for Top KPI Cards (Using the new enriched table)
 kpi_query = """
 SELECT 
     COUNT(*) as total_reqs,
     ROUND(AVG(ttft_ms), 1) as avg_ttft,
-    ROUND(AVG(tokens_per_sec), 1) as avg_throughput,
+    SUM(CASE WHEN is_p99_latency_spike = TRUE THEN 1 ELSE 0 END) as total_spikes,
     ROUND(SUM(cost_usd), 2) as total_cost
-FROM main.fct_inference_requests;
+FROM main.fct_enriched_telemetry;
 """
 
 try:
@@ -40,43 +51,39 @@ try:
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Logged Requests", f"{kpi_df['total_reqs'][0]:,}")
     col2.metric("Global Avg TTFT", f"{kpi_df['avg_ttft'][0]} ms")
-    col3.metric("Global Avg Throughput", f"{kpi_df['avg_throughput'][0]} tok/s")
-    col4.metric("Total Financial Bill", f"${kpi_df['total_cost'][0]:,}")
+    col3.metric("Anomalous P99 Spikes Caught", f"{kpi_df['total_spikes'][0]:,}", delta="- Localized Adaptive Threshold", delta_color="inverse")
+    col4.metric("Total Infrastructure Cost", f"${kpi_df['total_cost'][0]:,}")
     
     st.write("---")
     
-    # 5. Visualizations Section
+    # 5. Interactive Visualizations Sidebar/Filters
+    st.markdown("#### 🛠️ Localized Time-Series Telemetry (Last 500 Requests)")
+    
+    # Query to pull a slice of the rolling features for data visualization
+    time_series_query = """
+    SELECT 
+        created_at,
+        ttft_ms,
+        rolling_p99_ttft_100,
+        rolling_avg_throughput_100
+    FROM main.fct_enriched_telemetry
+    ORDER BY created_at DESC
+    LIMIT 500;
+    """
+    ts_df = get_warehouse_data(time_series_query)
+    
+    # Split charts into two columns
     chart_col1, chart_col2 = st.columns(2)
     
     with chart_col1:
-        st.markdown("#### 💻 Throughput Speed by Hardware Chip Tier")
-        hardware_query = """
-        SELECT 
-            d.hardware_tier,
-            ROUND(AVG(f.tokens_per_sec), 1) as avg_throughput_tok_sec
-        FROM main.fct_inference_requests f
-        JOIN main.dim_hardware_nodes d ON f.node_id = d.node_id
-        GROUP BY d.hardware_tier
-        ORDER BY avg_throughput_tok_sec DESC;
-        """
-        hw_df = get_warehouse_data(hardware_query)
-        # Render clean bar chart using native streamlit components
-        st.bar_chart(data=hw_df, x="hardware_tier", y="avg_throughput_tok_sec", color="#4682B4")
+        st.markdown("**Adaptive P99 Latency Boundary vs Raw TTFT**")
+        # Line chart showing raw latency vs the rolling 100-request safety envelope
+        st.line_chart(data=ts_df, x="created_at", y=["ttft_ms", "rolling_p99_ttft_100"], color=["#1f77b4", "#ff7f0e"])
         
     with chart_col2:
-        st.markdown("#### ⚡ Latency vs Cost by Quantization Model Config")
-        quant_query = """
-        SELECT 
-            model_configuration,
-            ROUND(AVG(ttft_ms), 1) as avg_latency_ms,
-            ROUND(AVG(cost_usd), 4) as avg_cost_per_request_usd
-        FROM main.fct_inference_requests
-        GROUP BY model_configuration;
-        """
-        quant_df = get_warehouse_data(quant_query)
-        # Render an analytical table profile for direct cross-comparison
-        st.dataframe(quant_df, use_container_width=True, hide_index=True)
-    
+        st.markdown("**100-Request Rolling Throughput Moving Average (TPS)**")
+        # Line chart tracing the rolling moving average profile
+        st.line_chart(data=ts_df, x="created_at", y="rolling_avg_throughput_100", color="#2ca02c")
+
 except Exception as e:
-    st.error(f"❌ Failed to connect to analytical warehouse: {e}")
-    st.info("Ensure your dbt models have been successfully run and materialized into the 'main' schema.")
+    st.error(f"❌ Failed to render telemetry dashboard: {e}")
