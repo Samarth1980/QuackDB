@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: stg_inference_logs
+    description: "The primary cleaned staging view for raw application cluster telemetry."
+    columns:
+      - name: request_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_hardware_nodes
+    description: "Dimension table isolating individual cluster hardware tiers."
+    columns:
+      - name: node_id
+        tests:
+          - unique
+          - not_null
+      - name: hardware_tier
+        tests:
+          - not_null
+
+  - name: fct_inference_requests
+    description: "Centralized analytical fact table containing quantitative performance metrics."
+    columns:
+      - name: request_id
+        tests:
+          - unique
+          - not_null
+      - name: status_code
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [200, 500]
