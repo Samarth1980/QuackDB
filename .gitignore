@@ -1,0 +1,4 @@
+dbt_pipeline/target/
+data/quackdb.db
+__pycache__/
+.DS_Store
