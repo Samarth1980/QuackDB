@@ -13,8 +13,8 @@ def execute_hardware_hypothesis_test():
     # 2. Extract performance records directly from our dbt structured marts
     query = """
     SELECT f.ttft_ms, d.hardware_tier 
-    FROM marts.fct_inference_requests f
-    JOIN marts.dim_hardware_nodes d ON f.node_id = d.node_id
+    FROM main.fct_inference_requests f
+    JOIN main.dim_hardware_nodes d ON f.node_id = d.node_id
     WHERE d.hardware_tier IN ('NVIDIA-H100', 'NVIDIA-T4');
     """
     df = con.execute(query).df()
