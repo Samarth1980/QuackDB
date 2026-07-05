@@ -22,10 +22,8 @@ def get_warehouse_data(query):
 st.title("🦆 QuackDB Enterprise Observability Engine")
 st.markdown("### Real-Time Core Telemetry Warehouse & Advanced Production Drift Monitor")
 
-# -------------------------------------------------------------------------
-# LIVE ALERTS LAYER: Population Stability Index Banner
-# -------------------------------------------------------------------------
-# Hardcoded from your Hour 12 analysis to simulate a production monitoring loop
+# alerta layer: using Population Stability Index 
+# Simulates a production monitoring loop using our results from right now of 0.47723, which is above the threshold of 0.25, indicating a drift in the distribution of our production traffic.
 psi_score = 0.47723 
 st.write("---")
 st.error(

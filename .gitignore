@@ -1,4 +1,18 @@
-dbt_pipeline/target/
+# Data Warehouse Binaries
 data/quackdb.db
+data/*.db
+data/*.db.wal
+data/*.parquet
+
+# Python Environments & Cache
 __pycache__/
-.DS_Store
+*.pyc
+.venv/
+env/
+pyvenv.cfg
+
+# dbt Artifacts & Logs
+target/
+dbt_packages/
+logs/
+dbt_modules/

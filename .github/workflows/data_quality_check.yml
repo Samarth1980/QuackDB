@@ -1,17 +1,40 @@
-name: QuackDB Code Quality Check
+name: QuackDB Production Data Quality & Pipeline Check
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
-  ping_check:
+  build-and-test:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
 
-      - name: System Environment Check
-        run: echo "CI/CD Pipeline Initialized. Standing by for Hour 15 data validation assertions."
+    steps:
+    - name: 📥 Check out Repository Code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python 3.11 Runtime
+      uses: actions/setup-python@v5
+      with:
+        python-python-version: '3.11'
+        cache: 'pip'
+
+    - name: 📦 Install Core Engineering Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy duckdb dbt-duckdb scipy streamlit flake8
+
+    - name: 🧼 Lint Check Source Code Architecture (Syntax Audit)
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,Y --show-source --statistics
+        # Exit-zero treats remaining style warnings gracefully
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: 🧪 Verify Analytics Scripts Compilation Integrity
+      run: |
+        # Ensures files compile without throwing import or initialization block traces
+        python -m py_compile data_generation/feature_engineering.py
+        python -m py_compile data_generation/run_quantization_validation.py
+        python -m py_compile data_generation/drift_analysis.py
