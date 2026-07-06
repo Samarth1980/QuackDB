@@ -12,7 +12,7 @@ env/
 pyvenv.cfg
 
 # dbt Artifacts & Logs
-target/
+**/target/
 dbt_packages/
-logs/
+**/logs/
 dbt_modules/

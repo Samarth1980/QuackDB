@@ -1,7 +1,7 @@
 {{ config(materialized='view') }}
 
 with raw_source as (
-    select * from raw_logs
+    select * from read_parquet('../data/raw_inference_logs.parquet')
 )
 
 select

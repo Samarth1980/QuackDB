@@ -4,22 +4,25 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine
 
-def generate_telemetry_dataset(num_records=500000):
-    print(f"⚡ Vectorizing {num_records} raw LLM inference telemetry logs...")
+def generate_telemetry_dataset(num_records=25000000):
+    print(f"⚡ Vectorizing {num_records:,} raw LLM inference telemetry logs...")
     start_time = time.time()
     
     # 1. Define hardware clusters and configuration states
     nodes = ['node_us_east_01', 'node_eu_west_02', 'node_asia_pacific_03', 'node_local_edge_04']
     gpu_types = ['NVIDIA-H100', 'AMD-MI300X', 'NVIDIA-T4', 'Apple-M2-Max']
-    node_gpu_map = dict(zip(nodes, gpu_types))
     
     configs = ['FP16_baseline', 'INT8_quantized', 'INT4_extreme_quant']
     algorithms = ['Round-Robin', 'Inverse-Weight-Custom']
     
-    # 2. Vectorized generation using NumPy for speed
+    # 2. Vectorized generation using NumPy indices for safety and speed
     np.random.seed(42)
-    generated_nodes = np.random.choice(nodes, size=num_records, p=[0.4, 0.3, 0.2, 0.1])
-    generated_gpus = [node_gpu_map[node] for node in generated_nodes]
+    
+    # Generate random positional indices instead of strings directly
+    node_indices = np.random.choice(len(nodes), size=num_records, p=[0.4, 0.3, 0.2, 0.1])
+    generated_nodes = np.array(nodes)[node_indices]
+    generated_gpus = np.array(gpu_types)[node_indices]
+    
     generated_configs = np.random.choice(configs, size=num_records, p=[0.3, 0.5, 0.2])
     generated_algos = np.random.choice(algorithms, size=num_records, p=[0.5, 0.5])
     
@@ -28,45 +31,36 @@ def generate_telemetry_dataset(num_records=500000):
     start_ts = end_ts - (48 * 3600)
     timestamps = pd.to_datetime(np.random.uniform(start_ts, end_ts, size=num_records), unit='s')
     
-    # 3. Model complex math distributions for metrics (creating realistic skews)
-    base_latency = np.random.exponential(scale=150, size=num_records) + 50 # Base exponential distribution
+    # 3. Model complex math distributions for metrics (Fully Vectorized)
+    base_latency = np.random.exponential(scale=150, size=num_records) + 50 
     
-    # Artificially alter latency based on the hardware configuration
-    for i in range(num_records):
-        if generated_configs[i] == 'INT4_extreme_quant':
-            base_latency[i] *= 0.45  # Quantization speeds up computing time
-        elif generated_gpus[i] == 'NVIDIA-T4':
-            base_latency[i] *= 1.8   # Older hardware drags performance down
+    # Replaced the loop with vectorized mask applications
+    base_latency = np.where(generated_configs == 'INT4_extreme_quant', base_latency * 0.45, base_latency)
+    base_latency = np.where(generated_gpus == 'NVIDIA-T4', base_latency * 1.8, base_latency)
             
     # Add network overhead variance
-    network_hop_delay = np.random.normal(loc=45, scale=15, size=num_records)
-    network_hop_delay = np.clip(network_hop_delay, 5, None) # Clamp negative values
-    
+    network_hop_delay = np.clip(np.random.normal(loc=45, scale=15, size=num_records), 5, None)
     serialization_overhead = np.random.gamma(shape=2, scale=10, size=num_records)
     
     # Calculate operational KPIs
     ttft_ms = base_latency + network_hop_delay + serialization_overhead
     tokens_count = np.random.randint(32, 1024, size=num_records)
-    
-    # Base throughput model
     tokens_per_sec = tokens_count / (ttft_ms / 1000.0)
     
-    # Calculate costs based on GPU tiers
+    # Vectorized Cost Calculation
     cost_mapping = {'NVIDIA-H100': 0.002, 'AMD-MI300X': 0.0012, 'NVIDIA-T4': 0.0004, 'Apple-M2-Max': 0.0001}
-    cost_per_token = np.array([cost_mapping[gpu] for gpu in generated_gpus])
-    if config_index := np.where(generated_configs == 'INT4_extreme_quant'):
-        cost_per_token[config_index] *= 0.7 # Quantization lowers memory foot-print and cost
-    
+    cost_per_token = np.vectorize(cost_mapping.get)(generated_gpus)
+    cost_per_token = np.where(generated_configs == 'INT4_extreme_quant', cost_per_token * 0.7, cost_per_token)
     total_cost = tokens_count * cost_per_token
     
-    # 4. Inject simulated error anomalies (0.8% failure rates, spiked on local edge nodes)
+    # 4. Inject simulated error anomalies
     status_codes = np.ones(num_records, dtype=int) * 200
     error_indices = np.random.choice(num_records, size=int(num_records * 0.008), replace=False)
     status_codes[error_indices] = 500
     
-    # Build the final comprehensive DataFrame
+    # Build the final comprehensive DataFrame (Cleaned up modern NumPy namespace)
     df = pd.DataFrame({
-        'request_id': [f"req_{i:07d}" for i in range(num_records)],
+        'request_id': np.char.add("req_", np.char.zfill(np.arange(num_records).astype(str), 7)),
         'timestamp': timestamps,
         'node_id': generated_nodes,
         'hardware_tier': generated_gpus,
@@ -86,14 +80,14 @@ def generate_telemetry_dataset(num_records=500000):
 
 def stream_to_postgres(df):
     print("🚀 Initiating Bulk Connection to PostgreSQL OLTP Layer...")
-    # Connecting to port 5433 to match your adjusted configuration
     engine = create_engine('postgresql://admin:telemetry_secret_pass@localhost:5433/raw_telemetry')
     
     start_time = time.time()
-    # Write dataframe to SQL database table named 'raw_inference_logs'
-    df.to_sql('raw_inference_logs', engine, if_exists='replace', index=False, chunksize=50000)
-    print(f"💾 Successfully loaded {len(df)} rows into 'raw_inference_logs' in {time.time() - start_time:.2f} seconds!")
+    df.to_sql('raw_inference_logs', engine, if_exists='replace', index=False, chunksize=100000)
+    print(f"💾 Successfully loaded {len(df):,} rows into 'raw_inference_logs' in {time.time() - start_time:.2f} seconds!")
 
 if __name__ == "__main__":
-    telemetry_df = generate_telemetry_dataset(500000)
+    import sys
+    rows = int(sys.argv[1]) if len(sys.argv) > 1 else 25000000
+    telemetry_df = generate_telemetry_dataset(rows)
     stream_to_postgres(telemetry_df)
