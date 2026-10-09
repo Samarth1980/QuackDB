@@ -19,15 +19,15 @@ def get_warehouse_data(query):
     return df
 
 # 3. Header Infrastructure
-st.title("🦆 QuackDB Enterprise Observability Engine")
-st.markdown("### Real-Time Core Telemetry Warehouse & Advanced Production Drift Monitor")
+st.title("The QuackDB Engine")
+st.markdown("### Real time Telemetry Warehouse & Drift Monitor")
 
 # alerta layer: using Population Stability Index 
 # Simulates a production monitoring loop using our results from right now of 0.47723, which is above the threshold of 0.25, indicating a drift in the distribution of our production traffic.
 psi_score = 0.47723 
 st.write("---")
 st.error(
-    f"🚨 **CRITICAL INFRASTRUCTURE ALERT:** Systemic distribution drift caught! "
+    f"**CRITICAL INFRASTRUCTURE ALERT:** Systemic distribution drift has been caught. "
     f"Calculated Population Stability Index (PSI): **{psi_score:.5f}** (Threshold >= 0.25). "
     f"Potential thermal throttling or packet routing anomalies detected across active clusters."
 )
