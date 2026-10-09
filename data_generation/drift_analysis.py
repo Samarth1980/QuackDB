@@ -54,9 +54,9 @@ def execute_drift_simulation_engine():
     print(f"📊 Baseline established with {len(baseline_ttft):,} operational logs.")
     print(f"   • Historical Avg Latency: {baseline_ttft.mean():.2f} ms")
     
-    # -------------------------------------------------------------------------
+
     # CHAOS MONKEY SIMULATION: Generate recent degraded production traffic
-    # -------------------------------------------------------------------------
+  
     print("\n⚡ Simulating recent production batch with artificial thermal degradation...")
     np.random.seed(42)
     sample_size = 50000
@@ -72,19 +72,16 @@ def execute_drift_simulation_engine():
     
     print(f"📥 Target test population generated with {len(target_ttft):,} recent evaluation rows.")
     print(f"   • Current Evaluation Traffic Avg Latency: {target_ttft.mean():.2f} ms")
+
     
-    # -------------------------------------------------------------------------
     # PSI CALCULATOR EVALUATION LAYER
-    # -------------------------------------------------------------------------
     print("\n🧮 Compiling Population Stability Index (PSI) matrix across bins...")
     psi_score = calculate_psi(baseline_ttft, target_ttft, num_bins=10)
     
-    print("\n=======================================================")
+
     print("🚨 PRODUCTION INFRASTRUCTURE DRIFT METRIC REPORT")
-    print("=======================================================")
     print(f"Calculated Population Stability Index: {psi_score:.5f}")
     
-    print("-------------------------------------------------------")
     if psi_score < 0.1:
         print("✅ SYSTEM STATUS: STABLE")
         print("   The recent production traffic matches historical distributions baseline.")
