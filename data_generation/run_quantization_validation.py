@@ -30,23 +30,21 @@ def execute_quantization_hypothesis_test():
     # 3. Compute Non-Parametric Mann-Whitney U Test
     print("\n🧮 Computing rank-sum statistics across optimization tiers...")
     u_statistic, p_value = stats.mannwhitneyu(int8_throughput, int4_throughput, alternative='two-sided')
+
     
-    print("\n=======================================================")
     print("🔬 QUANTIZATION EFFICIENCY HYPOTHESIS REPORT")
-    print("=======================================================")
     print(f"Computed U-Statistic : {u_statistic:,.2f}")
     print(f"Asymptotic P-Value   : {p_value}")
     
     alpha = 0.05  # 95% Confidence Interval Boundary
-    print("-------------------------------------------------------")
+    
     if p_value < alpha:
-        print("🚨 CRITICAL CONCLUSION: REJECT THE NULL HYPOTHESIS (H₀)")
+        print(" CRITICAL CONCLUSION: REJECT THE NULL HYPOTHESIS (H₀)")
         print(f"   The throughput delta between INT8 and INT4 is mathematically significant (p < {alpha}).")
         print("   Quantization compression directly impacts inference speeds.")
     else:
-        print("✅ CONCLUSION: FAIL TO REJECT THE NULL HYPOTHESIS (H₀)")
+        print(" CONCLUSION: FAIL TO REJECT THE NULL HYPOTHESIS (H₀)")
         print("   No statistically significant difference in speed distributions detected.")
-    print("=======================================================\n")
 
 if __name__ == "__main__":
     execute_quantization_hypothesis_test()
