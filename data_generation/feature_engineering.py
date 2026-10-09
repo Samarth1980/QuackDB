@@ -60,13 +60,10 @@ def run_telemetry_feature_engineering():
     
     # Quick sanity check printout
     total_spikes = df['is_p99_latency_spike'].sum()
-    print("\n=======================================================")
     print("📊 FEATURE ENGINEERING METRIC SUMMARY")
-    print("=======================================================")
     print(f"Total Enriched Rows Processed   : {len(df):,}")
     print(f"Isolated Localized P99 Spikes   : {total_spikes:,} ({ (total_spikes/len(df))*100:.2f}% of traffic)")
     print("Target Schema Destination       : main.fct_enriched_telemetry")
-    print("=======================================================\n")
     
     con.close()
     print("🎉 Feature engineering pipeline complete! Table successfully built.")
