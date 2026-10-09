@@ -32,14 +32,11 @@ def execute_hardware_hypothesis_test():
     print("\n🧮 Computing Mann-Whitney U Test ranks across populations...")
     u_statistic, p_value = stats.mannwhitneyu(h100_latencies, t4_latencies, alternative='two-sided')
     
-    print("\n=======================================================")
     print("🔬 INDUSTRIAL STATISTICAL HYPOTHESIS TEST REPORT")
-    print("=======================================================")
     print(f"Computed U-Statistic : {u_statistic:,.2f}")
     print(f"Asymptotic P-Value   : {p_value}")
     
     alpha = 0.05
-    print("-------------------------------------------------------")
     if p_value < alpha:
         print("🚨 CRITICAL CONCLUSION: REJECT THE NULL HYPOTHESIS (H₀)")
         print(f"   The latency difference between the tiers is statistically significant (p < {alpha}).")
@@ -47,7 +44,6 @@ def execute_hardware_hypothesis_test():
     else:
         print("✅ CONCLUSION: FAIL TO REJECT THE NULL HYPOTHESIS (H₀)")
         print("   No statistically significant variance detected between performance populations.")
-    print("=======================================================\n")
 
 if __name__ == "__main__":
     execute_hardware_hypothesis_test()
